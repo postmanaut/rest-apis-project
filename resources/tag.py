@@ -19,6 +19,7 @@ class TagsInStore(MethodView):
     @blp.arguments(TagSchema)
     @blp.response(201, TagSchema)
     def post(self, tag_data, store_id):
+        # if TagModel.query.filter(TagModel.store_id == store_id).first():
         if TagModel.query.filter(TagModel.store_id == store_id, TagModel.name == tag_data["name"]).first():
             abort(400, message="A tag with that name already exists in that store.")
 
@@ -35,16 +36,34 @@ class TagsInStore(MethodView):
 
         return tag
 
+@blp.route("/store/<int:store_id>/tag/<int:tag_id>")
+class LinkTagsToStore(MethodView):
+    @blp.response(201, TagSchema)
+    # appends a tag to item
+    def post(self, store_id, tag_id):
+        store = StoreModel.query.get_or_404(store_id)
+        tag = TagModel.query.get_or_404(tag_id)
+    
+        store.tags.append(tag)
+
+        try:
+            db.session.add(store)
+            db.session.commit()
+        except SQLAlchemyError:
+            abort(500, message="Unable to add tag")
+        
+        return tag
+
 @blp.route("/item/<int:item_id>/tag/<int:tag_id>")
 class LinkTagsToItem(MethodView):
     @blp.response(201, TagSchema)
     # appends a tag to item
     def post(self, item_id, tag_id):
-        # if item.store.id != tag.store.id:
-        #      abort(400, message="Make sure item and tag belong to the same store before linking.")
-
         item = ItemModel.query.get_or_404(item_id)
         tag = TagModel.query.get_or_404(tag_id)
+
+        if item.store.id != tag.store.id:
+             abort(400, message="Make sure item and tag belong to the same store before linking.")
     
         item.tags.append(tag)
 

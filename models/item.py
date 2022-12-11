@@ -8,5 +8,7 @@ class ItemModel(db.Model):
     description = db.Column(db.String)
     price = db.Column(db.Float(precision=2), unique=False, nullable=False)
     store_id = db.Column(db.Integer, db.ForeignKey("stores.id"), unique=False, nullable=False)
+    #attempting to make it so you can add an item to store and have a tag
+    #tag_id = db.Column(db.Integer, db.ForeignKey("tags.id"), unique=False, nullable=False)
     store = db.relationship("StoreModel", back_populates="items")
     tags = db.relationship("TagModel", back_populates="items", secondary="items_tags")
