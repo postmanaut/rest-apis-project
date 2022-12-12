@@ -13,7 +13,6 @@ def render_template(template_filename, **context):
     return template_env.get_template(template_filename).render(**context)
 
 def send_simple_message(to, subject, body, html):
-    #DOMAIN = os.getenv("MAILGUN_DOMAIN")
     return requests.post(
         f"https://api.mailgun.net/v3/{DOMAIN}/messages",
         auth=("api", os.getenv("MAILGUN_API_KEY")),
